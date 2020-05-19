@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.4.24 <0.7.0;
+pragma solidity >=0.5.0 <0.7.0;
 
 import "../coffeeaccesscontrol/RetailerRole.sol";
 import "../coffeeaccesscontrol/FarmerRole.sol";
 import "../coffeeaccesscontrol/ConsumerRole.sol";
 import "../coffeeaccesscontrol/DistributorRole.sol";
+import "../coffeecore/Ownable.sol";
 
 
 /// @title SupplyChain
@@ -13,10 +14,11 @@ contract SupplyChain is
     ConsumerRole,
     DistributorRole,
     FarmerRole,
-    RetailerRole
+    RetailerRole,
+    Ownable
 {
     /// @dev Define 'owner'
-    address owner;
+    // address payable owner;
 
     /// @dev Define a variable called 'upc' for Universal Product Code (UPC)
     uint256 upc;
@@ -77,10 +79,10 @@ contract SupplyChain is
     event Purchased(uint256 upc);
 
     /// @dev Define a modifer that checks to see if msg.sender == owner of the contract
-    modifier onlyOwner() {
-        require(msg.sender == owner, "You're not the owner");
-        _;
-    }
+    // modifier onlyOwner() {
+    //     require(msg.sender == owner, "You're not the owner");
+    //     _;
+    // }
 
     /// @dev Define a modifer that verifies the Caller
     /// @param _address The address that has to be matched to the Caller
@@ -203,14 +205,14 @@ contract SupplyChain is
      * and set 'upc' to 1
      */
     constructor() public payable {
-        owner = msg.sender;
+        origOwner = msg.sender;
         sku = 1;
         upc = 1;
     }
 
     /// @dev Define a function 'kill' if required
     function kill() public {
-        if (msg.sender == owner) {
+        if (msg.sender == origOwner) {
             selfdestruct(msg.sender);
         }
     }
@@ -218,18 +220,18 @@ contract SupplyChain is
     /// @dev Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
     function harvestItem(
         uint256 _upc,
-        address _originFarmerID,
+        address payable _originFarmerID,
         string memory _originFarmName,
         string memory _originFarmInformation,
         string memory _originFarmLatitude,
         string memory _originFarmLongitude,
         string memory _productNotes
-    ) public verifyCaller(_originFarmerID) itemExists(_upc) onlyFarmer {
+    ) public itemExists(_upc) onlyFarmer {
         /// @dev Add the new item as part of Harvest
         items[_upc].sku = sku;
         items[_upc].upc = upc;
         items[_upc].ownerID = _originFarmerID;
-        items[_upc].originFarmerID = msg.sender;
+        items[_upc].originFarmerID = _originFarmerID;
         items[_upc].originFarmName = _originFarmName;
         items[_upc].originFarmInformation = _originFarmInformation;
         items[_upc].originFarmLatitude = _originFarmLatitude;
@@ -272,6 +274,7 @@ contract SupplyChain is
         processed(_upc)
         /// @dev Call modifier to verify caller of this function
         verifyCaller(items[_upc].ownerID)
+        onlyFarmer
     {
         /// @dev Update the appropriate fields
         items[_upc].itemState = State.Packed;
@@ -403,6 +406,7 @@ contract SupplyChain is
         itemSKU = items[_upc].sku;
         itemUPC = items[_upc].upc;
         ownerID = items[_upc].ownerID;
+        originFarmerID = items[_upc].originFarmerID;
         originFarmName = items[_upc].originFarmName;
         originFarmInformation = items[_upc].originFarmInformation;
         originFarmLatitude = items[_upc].originFarmLatitude;
@@ -421,7 +425,16 @@ contract SupplyChain is
     }
 
     /// @dev Define a function 'fetchItemBufferTwo' that fetches the data
-
+    /// @param _upc UPC to select a specific item from mapping items
+    /// @return itemSKU
+    /// @return itemUPC
+    /// @return productID
+    /// @return productNotes
+    /// @return productPrice
+    /// @return itemState
+    /// @return distributorID
+    /// @return retailerID
+    /// @return consumerID
     function fetchItemBufferTwo(uint256 _upc)
         public
         view

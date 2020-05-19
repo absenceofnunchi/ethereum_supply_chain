@@ -1,14 +1,16 @@
-pragma solidity ^0.4.24;
+// SPDX-License-Identifier: GPL-3.0
+pragma solidity >=0.5.0 <0.7.0;
+
 
 /// Provides basic authorization control
 contract Ownable {
-    address private origOwner;
+    address internal origOwner;
 
     // Define an Event
     event TransferOwnership(address indexed oldOwner, address indexed newOwner);
 
     /// Assign the contract to an owner
-    constructor () internal {
+    constructor() internal {
         origOwner = msg.sender;
         emit TransferOwnership(address(0), origOwner);
     }
@@ -20,7 +22,7 @@ contract Ownable {
 
     /// Define a function modifier 'onlyOwner'
     modifier onlyOwner() {
-        require(isOwner());
+        require(isOwner(), "Only owner is allowed");
         _;
     }
 
@@ -42,7 +44,7 @@ contract Ownable {
 
     /// Define an internal function to transfer ownership
     function _transferOwnership(address newOwner) internal {
-        require(newOwner != address(0));
+        require(newOwner != address(0), "The new owner cannot be uninitiated");
         emit TransferOwnership(origOwner, newOwner);
         origOwner = newOwner;
     }

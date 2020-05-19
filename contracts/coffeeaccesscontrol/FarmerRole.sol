@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0
-pragma solidity >=0.4.24 <0.7.0;
+pragma solidity >=0.5.0 <0.7.0;
 
 // Import the library 'Roles'
 import "./Roles.sol";
@@ -38,7 +38,7 @@ contract FarmerRole {
     }
 
     /// @dev Define a function 'addFarmer' that adds this role
-    /// @param account The address of a farmer
+    /// @param account The address of a soon-to-be farmer
     function addFarmer(address account) public onlyFarmer {
         _addFarmer(account);
     }
