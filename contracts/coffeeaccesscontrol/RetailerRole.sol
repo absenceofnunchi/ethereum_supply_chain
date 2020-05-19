@@ -31,7 +31,7 @@ contract RetailerRole {
     /// @dev Define a function 'isRetailer' to check this role
     /// @param account The address of a retailer
     function isRetailer(address account) public view returns (bool) {
-        retailers.has(account);
+        return retailers.has(account);
     }
 
     /// @dev Define a function 'addRetailer' that adds this role

@@ -273,7 +273,7 @@ contract SupplyChain is
         /// @dev Call modifier to check if upc has passed previous supply chain stage
         processed(_upc)
         /// @dev Call modifier to verify caller of this function
-        verifyCaller(items[_upc].ownerID)
+        verifyCaller(items[_upc].originFarmerID)
         onlyFarmer
     {
         /// @dev Update the appropriate fields
@@ -290,7 +290,8 @@ contract SupplyChain is
         /// @dev Call modifier to check if upc has passed previous supply chain stage
         packed(_upc)
         /// @dev Call modifier to verify caller of this function
-        verifyCaller(items[_upc].ownerID)
+        verifyCaller(items[_upc].originFarmerID)
+        onlyFarmer
     {
         /// @dev Update the appropriate fields
         items[_upc].productPrice = _price;
@@ -312,6 +313,7 @@ contract SupplyChain is
         paidEnough(items[_upc].productPrice)
         /// @dev Call modifer to send any excess ether back to buyer
         checkValue(_upc)
+        onlyDistributor
     {
         /// @dev Update the appropriate fields - ownerID, distributorID, itemState
         items[_upc].ownerID = msg.sender;
@@ -332,7 +334,7 @@ contract SupplyChain is
         /// @dev Call modifier to check if upc has passed previous supply chain stage
         sold(_upc)
         /// @dev Call modifier to verify caller of this function
-        verifyCaller(items[_upc].ownerID)
+        verifyCaller(items[_upc].distributorID)
     {
         /// @dev Update the appropriate fields
         items[_upc].itemState = State.Shipped;
